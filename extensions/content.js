@@ -60,32 +60,26 @@ style.innerHTML = `
     .q-btn-settings:hover { opacity: 0.7; }
 
     /* Settings Menu Dropdown */
-    .q-settings-menu { display: none; position: fixed; top: 70px; right: 24px; background: var(--rh__bg-default, #ffffff); border: 1px solid var(--rh__divider-color, #e2e2e4); border-radius: 8px; box-shadow: 0 4px 12px rgba(0,0,0,0.15); padding: 8px; z-index: 9999; width: 200px; }
-    @media (prefers-color-scheme: dark) { .q-settings-menu { background: var(--rh__bg-default, #131315); border-color: var(--rh__divider-color, #333333); } }
+    .q-settings-menu { display: none; position: fixed; top: 70px; right: 24px; background: var(--rh__bg-default, #ffffff); border: 1px solid var(--rh__divider-color, #e2e2e4); border-radius: 8px; box-shadow: 0 4px 12px rgba(0,0,0,0.15); padding: 12px; z-index: 9999; width: 220px; }
     .q-settings-menu.show { display: block; }
-    .q-settings-item { display: flex; flex-direction: column; gap: 4px; padding: 8px; }
+    .q-settings-item { display: flex; flex-direction: column; gap: 4px; padding: 8px 0; }
     .q-settings-label { font-size: 13px; font-weight: 600; color: var(--rh__text-color); cursor: default; }
     
-    .q-settings-select { background: var(--rh__bg-subtle, #f5f8fa); border: 1px solid var(--rh__divider-color, #e2e2e4); color: var(--rh__text-color, #000); padding: 4px 8px; border-radius: 4px; font-size: 13px; font-family: inherit; width: 100%; outline: none; cursor: pointer; }
-    .q-settings-select option { background: #ffffff; color: #000000; }
-    @media (prefers-color-scheme: dark) { 
-        .q-settings-select { background: #202023; border-color: #333333; color: #ffffff; }
-        .q-settings-select option { background: #131315; color: #ffffff; } 
-    }
+    .q-settings-select { background: var(--rh__bg-subtle, #f5f8fa); border: 1px solid var(--rh__divider-color, #e2e2e4); color: var(--rh__text-color, #000); padding: 6px 8px; border-radius: 4px; font-size: 13px; font-family: inherit; width: 100%; outline: none; cursor: pointer; }
+    .q-settings-select option { background: var(--rh__bg-default, #ffffff); color: var(--rh__text-color, #000); }
 
     .q-btn-danger { background: transparent; color: #FF5000; border: 1px solid rgba(255, 80, 0, 0.5); margin-top: 4px; width: 100%; padding: 6px; border-radius: 6px; cursor: pointer; font-weight: 600; font-size: 13px; transition: all 0.2s; }
-    .q-btn-danger:hover { background: #FF5000; color: #ffffff; }
+    .q-btn-danger:hover { background: #FF5000; color: var(--rh__bg-default, #ffffff); }
 
     /* Persistent Native Settings Button */
     .q-floating-settings { display: none; position: fixed; top: 80px; right: 24px; background: var(--rh__bg-default, #ffffff); border: 1px solid var(--rh__divider-color, #e2e2e4); border-radius: 50%; width: 40px; height: 40px; align-items: center; justify-content: center; cursor: pointer; z-index: 9998; box-shadow: 0 4px 12px rgba(0,0,0,0.15); color: var(--rh__text-color, #000); transition: opacity 0.2s; }
     .q-floating-settings svg { width: 20px; height: 20px; }
     .q-floating-settings:hover { opacity: 0.8; }
-    @media (prefers-color-scheme: dark) { .q-floating-settings { background: var(--rh__bg-default, #131315); color: var(--rh__text-color, #fff); border-color: #333333; } }
 
     .q-inline-form { display: none; padding: 12px 24px; border-bottom: 1px solid var(--rh__divider-color); }
     .q-inline-input { background: var(--rh__bg-subtle); border: 1px solid var(--rh__divider-color); color: var(--rh__text-color); padding: 8px 12px; border-radius: 6px; outline: none; font-size: 14px; width: 140px; font-family: inherit; }
-    .q-btn-save { background: #00C805; color: var(--rh__bg-default); border: none; padding: 6px 14px; border-radius: 6px; cursor: pointer; font-weight: 700; margin-left: 8px; font-size: 13px; }
-    .q-btn-cancel { background: transparent; color: var(--rh__text-muted); border: none; cursor: pointer; font-size: 13px; margin-left: 8px; }
+    .q-btn-save { background: #00C805; color: var(--rh__bg-default, #ffffff); border: none; padding: 6px 14px; border-radius: 6px; cursor: pointer; font-weight: 700; margin-left: 8px; font-size: 13px; }
+    .q-btn-cancel { background: transparent; color: var(--rh__text-muted, #888); border: none; cursor: pointer; font-size: 13px; margin-left: 8px; }
 
     .q-group { margin: 0 !important; display: block !important;}
     .q-summary { display: flex !important; justify-content: space-between !important; align-items: center !important; padding: 0 24px !important; height: 36px !important; cursor: grab !important; list-style: none !important; outline: none !important; border-bottom: 1px solid var(--rh__divider-color); transition: background 0.2s; }
@@ -104,12 +98,11 @@ style.innerHTML = `
     .q-confirm-del { display: none; align-items: center; gap: 10px; }
     .q-btn-check { color: #00C805; cursor: pointer; font-size: 15px; font-weight: bold; background:none; border:none; padding: 0;}
     .q-btn-x { color: #FF5000; cursor: pointer; font-size: 15px; font-weight: bold; background:none; border:none; padding: 0;}
-    .q-btn-trash { background: transparent; border: none; color: var(--rh__text-muted); cursor: pointer; font-size: 14px; padding: 0 4px; }
+    .q-btn-trash { background: transparent; border: none; color: var(--rh__text-muted, #888); cursor: pointer; font-size: 14px; padding: 0 4px; }
     .q-btn-trash:hover { color: #FF5000; }
-    .q-btn-plus { background: transparent; border: none; color: var(--rh__text-muted); cursor: pointer; font-size: 16px; font-weight: 600; padding: 0 4px; margin-left: 4px; }
+    .q-btn-plus { background: transparent; border: none; color: var(--rh__text-muted, #888); cursor: pointer; font-size: 16px; font-weight: 600; padding: 0 4px; margin-left: 4px; }
     .q-btn-plus:hover { color: #00C805; }
 
-    /* Shrunk Dropzone */
     .q-dropzone { min-height: 28px !important; display: flex !important; flex-direction: column !important; padding-bottom: 4px; transition: background 0.2s; }
     .q-dropzone:empty::before { content: "Drag stocks here..."; color: var(--rh__text-muted, #888); font-size: 12px; text-align: center; padding-top: 8px; pointer-events: none; opacity: 0.5; }
     .q-dropzone.drag-over { background: rgba(0, 200, 5, 0.05) !important; border-left: 2px solid #00C805; }
@@ -124,8 +117,7 @@ style.innerHTML = `
     .q-left { display: flex !important; flex-direction: column !important; flex-basis: 30% !important; align-items: flex-start !important; pointer-events: none; justify-content: center; gap: 2px !important; }
     .q-ticker-wrap { display: flex; align-items: center; pointer-events: auto; }
     .q-ticker { font-weight: 600 !important; font-size: 13px !important; letter-spacing: -0.4px !important; color: var(--rh__text-color) !important; text-decoration: none !important; pointer-events: auto !important; }
-    .q-ticker:hover { color: #00C805 !important; }
-    .q-shares { font-size: 13px !important; font-weight: 400 !important; letter-spacing: -0.2px !important; color: var(--rh__text-muted) !important; }
+    .q-shares { font-size: 13px !important; font-weight: 400 !important; letter-spacing: -0.2px !important; color: var(--rh__text-muted, #888) !important; }
     
     .q-chart { display: flex !important; justify-content: center !important; align-items: center !important; flex-basis: 35% !important; pointer-events: none; }
     
@@ -150,6 +142,10 @@ function initGlobalUI() {
         menu.className = 'q-settings-menu';
         menu.id = 'q-settings-menu';
         menu.innerHTML = `
+            <div style="display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid var(--rh__divider-color, #e2e2e4); padding-bottom: 8px; margin-bottom: 8px;">
+                <span style="font-weight: 600; font-size: 14px; color: var(--rh__text-color, #000);">Settings</span>
+                <button id="btn-close-settings" style="background: transparent; border: none; color: var(--rh__text-muted, #888); cursor: pointer; font-size: 16px; padding: 0;">✕</button>
+            </div>
             <div class="q-settings-item">
                 <span class="q-settings-label">View Mode</span>
                 <select class="q-settings-select" id="q-select-view">
@@ -166,7 +162,7 @@ function initGlobalUI() {
                 </select>
             </div>
             <div class="q-settings-item" style="border-top: 1px solid var(--rh__divider-color, #e2e2e4); padding-top: 12px; margin-top: 4px;">
-                <button class="q-btn-danger" id="btn-reset-data">Reset</button>
+                <button class="q-btn-danger" id="btn-reset-data">Reset Dashboard</button>
                 <div class="q-confirm-del" id="ui-reset-confirm" style="justify-content: center; gap: 16px; padding: 4px 0;">
                     <button class="q-btn-check" id="btn-reset-yes">✓</button>
                     <button class="q-btn-x" id="btn-reset-no">✕</button>
@@ -174,6 +170,8 @@ function initGlobalUI() {
             </div>
         `;
         document.body.appendChild(menu);
+
+        document.getElementById('btn-close-settings').onclick = () => menu.classList.remove('show');
 
         document.getElementById('q-select-view').onchange = (e) => { 
             viewState = e.target.value; 
@@ -500,31 +498,58 @@ function syncShadowUI() {
 
                 const item = document.getElementById(`q-item-${ticker}`);
                 if (item) {
-                    const price = child.querySelector('[data-testid="PriceChangeQuoteWrapper"]')?.innerText;
-                    const pct = child.querySelector('[data-testid="PriceChangeValueWrapper"]')?.innerText;
+                    const priceNode = child.querySelector('[data-testid="PriceChangeQuoteWrapper"]');
+                    const pctNode = child.querySelector('[data-testid="PriceChangeValueWrapper"]');
                     
+                    let price = priceNode ? priceNode.textContent : null;
+                    let pct = pctNode ? pctNode.textContent : null;
+                    let isFallback = false;
+
+                    // FALLBACK LOGIC: If Robinhood hides the price to show Total Equity or Total Return
+                    if (!price) {
+                        const rightCol = child.querySelector('a').lastElementChild;
+                        if(rightCol) {
+                            price = rightCol.textContent; // This extracts "$6.82K", etc.
+                            isFallback = true;
+                        }
+                    }
+
                     if (price) item.querySelector('.q-price').innerText = price;
+                    else item.querySelector('.q-price').innerText = '...';
+
                     item.querySelector('.q-shares').innerText = sharesText;
                     
-                    if (pct) {
-                        const pctEl = item.querySelector('.q-percent');
+                    const pctEl = item.querySelector('.q-percent');
+                    const chartContainer = item.querySelector('.q-chart');
+                    const nativeSvg = child.querySelector('svg[data-testid="VisualizationsWrapper"]');
+
+                    if (pct && !isFallback) {
                         pctEl.innerText = pct;
                         const isRed = pct.includes('-');
                         pctEl.className = `q-percent ${isRed ? 'q-red' : 'q-green'}`;
                         const colorCode = isRed ? '#FF5000' : '#00C805';
 
-                        const nativeSvg = child.querySelector('svg[data-testid="VisualizationsWrapper"]');
-                        const chartContainer = item.querySelector('.q-chart');
-                        if (nativeSvg && chartContainer) {
+                        if (nativeSvg && chartContainer && !nativeSvg.closest('button')) {
                             let cloned = nativeSvg.cloneNode(true);
                             cloned.querySelectorAll('path').forEach(p => { if (p.getAttribute('fill') === 'none') { p.style.stroke = colorCode; p.style.strokeWidth = '1.5px'; }});
                             cloned.querySelectorAll('circle').forEach(c => c.style.fill = colorCode);
                             cloned.querySelectorAll('line').forEach(l => { l.style.stroke = 'rgba(138, 138, 142, 0.6)'; l.style.opacity = '1'; });
                             if (chartContainer.innerHTML !== cloned.outerHTML) chartContainer.innerHTML = cloned.outerHTML;
                         }
+                    } else {
+                        // Prevent the layout from looking broken when native UI is toggled
+                        //pctEl.innerText = isFallback ? '(Metric Toggled)' : '';
+                        pctEl.className = 'q-percent'; 
+                        if (nativeSvg && chartContainer && !nativeSvg.closest('button')) {
+                            let cloned = nativeSvg.cloneNode(true);
+                            cloned.querySelectorAll('path').forEach(p => { if (p.getAttribute('fill') === 'none') { p.style.stroke = 'var(--rh__text-muted, #888)'; p.style.strokeWidth = '1.5px'; }});
+                            cloned.querySelectorAll('line').forEach(l => { l.style.stroke = 'rgba(138, 138, 142, 0.6)'; l.style.opacity = '1'; });
+                            if (chartContainer.innerHTML !== cloned.outerHTML) chartContainer.innerHTML = cloned.outerHTML;
+                        }
                     }
 
-                    if (price && pct && sharesText) {
+                    // Strict Math Guardian: Only run aggregates if we have pure price/percent strings
+                    if (price && pct && !isFallback && sharesText) {
                         let p = parseFloat(price.replace(/[^0-9.-]/g, ''));
                         let s = parseFloat(sharesText.replace(/[^0-9.-]/g, ''));
                         let prc = parseFloat(pct.replace(/[^0-9.-]/g, '')) / 100;
@@ -565,6 +590,8 @@ function syncShadowUI() {
             }
             
             statsEl.innerHTML = `${primaryMetricHtml} <span class="${isR ? 'q-red' : 'q-green'}">${sign}${Math.abs(pDiff).toFixed(2)}%</span>`;
+        } else if (statsEl && !catStats[g].hasData) {
+             statsEl.innerHTML = ``; // Clear math output if disabled by metric toggle
         }
     });
 }
