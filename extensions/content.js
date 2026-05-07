@@ -18,6 +18,10 @@ let groupStates = JSON.parse(localStorage.getItem('rh_quant_states')) || {};
 let viewState = localStorage.getItem('rh_quant_view') || 'custom'; // 'custom' or 'native'
 let metricState = localStorage.getItem('rh_quant_metric') || 'today_gain'; // 'today_gain', 'total_value', 'all_time'
 
+// Sync State
+let isSyncing = false;
+let syncTickers = new Set();
+
 function saveState() { localStorage.setItem('rh_quant_groups', JSON.stringify(groups)); }
 function saveGroupStates() { localStorage.setItem('rh_quant_states', JSON.stringify(groupStates)); }
 function saveViewState() { localStorage.setItem('rh_quant_view', viewState); }
@@ -58,6 +62,10 @@ style.innerHTML = `
     .q-btn-action { background: transparent !important; color: #00C805 !important; border: 1px solid rgba(0, 200, 5, 0.5) !important; border-radius: 16px !important; padding: 4px 12px !important; font-size: 13px !important; font-weight: 600 !important; cursor: pointer !important; }
     .q-btn-settings { background: transparent; border: none; color: var(--rh__text-color); cursor: pointer; padding: 4px; display: flex; align-items: center; justify-content: center; }
     .q-btn-settings:hover { opacity: 0.7; }
+
+    #btn-sync-holdings {
+        display: none; /* Hidden by default */
+    }
 
     /* Settings Menu Dropdown */
     .q-settings-menu { display: none; position: fixed; top: 70px; right: 24px; background: var(--rh__bg-default, #ffffff); border: 1px solid var(--rh__divider-color, #e2e2e4); border-radius: 8px; box-shadow: 0 4px 12px rgba(0,0,0,0.15); padding: 12px; z-index: 9999; width: 220px; }
@@ -223,6 +231,41 @@ function initGlobalUI() {
             menu.classList.toggle('show');
         };
     }
+
+    if (!document.getElementById('q-sync-banner')) {
+        const banner = document.createElement('div');
+        banner.id = 'q-sync-banner';
+        banner.style.cssText = 'display: none; position: fixed; top: 0; left: 0; width: 100%; background: #00C805; color: #000; z-index: 10000; padding: 12px; justify-content: center; align-items: center; gap: 16px; font-weight: 600; font-size: 14px; box-shadow: 0 4px 12px rgba(0,0,0,0.15);';
+        banner.innerHTML = `
+            <span>Scroll through your entire native list to scan holdings. Found: <span id="q-sync-count">0</span></span>
+            <button id="q-sync-complete" style="background: #000; color: #fff; border: none; padding: 6px 12px; border-radius: 6px; cursor: pointer; font-weight: bold;">Finish Sync</button>
+            <button id="q-sync-cancel" style="background: transparent; color: #000; border: 1px solid #000; padding: 6px 12px; border-radius: 6px; cursor: pointer; font-weight: bold;">Cancel</button>
+        `;
+        document.body.appendChild(banner);
+
+        document.getElementById('q-sync-complete').onclick = () => {
+            // Reconcile arrays by filtering out anything not seen by the scanner
+            Object.keys(groups).forEach(g => {
+                groups[g] = groups[g].filter(t => syncTickers.has(t));
+            });
+            saveState();
+            isSyncing = false;
+            banner.style.display = 'none';
+            viewState = 'custom';
+            saveViewState();
+            const dash = document.getElementById('quant-dashboard');
+            if (dash) dash.remove();
+        };
+
+        document.getElementById('q-sync-cancel').onclick = () => {
+            isSyncing = false;
+            banner.style.display = 'none';
+            viewState = 'custom';
+            saveViewState();
+            const dash = document.getElementById('quant-dashboard');
+            if (dash) dash.remove();
+        };
+    }
 }
 
 function buildDashboard() {
@@ -233,6 +276,7 @@ function buildDashboard() {
         <div class="q-dash-header">
             <span class="q-dash-title">Stocks</span>
             <div class="q-header-right">
+                <button class="q-btn-action" id="btn-sync-holdings" style="margin-right: 4px; padding: 4px 8px !important;">⟳</button>
                 <button class="q-btn-action" id="btn-show-add-group">+ Add Group</button>
                 <button class="q-btn-settings" id="btn-q-settings">
                     <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
@@ -420,6 +464,18 @@ function syncShadowUI() {
         const settingsMenu = document.getElementById('q-settings-menu');
         if(settingsBtn) settingsBtn.onclick = () => settingsMenu.classList.toggle('show');
 
+        // New Sync Logic Initialization
+        document.getElementById('btn-sync-holdings').onclick = () => {
+            isSyncing = true;
+            syncTickers.clear();
+            document.getElementById('q-sync-count').innerText = "0";
+            document.getElementById('q-sync-banner').style.display = 'flex';
+            viewState = 'native';
+            saveViewState();
+            const dash = document.getElementById('quant-dashboard');
+            if (dash) dash.remove(); // Force UI to rebuild in native mode immediately
+        };
+
         document.getElementById('btn-show-add-group').onclick = () => { document.getElementById('ui-add-group').style.display = 'block'; document.getElementById('input-group-name').focus(); };
         document.getElementById('btn-cancel-group').onclick = () => { document.getElementById('ui-add-group').style.display = 'none'; document.getElementById('input-group-name').value = ''; };
         document.getElementById('btn-save-group').onclick = () => {
@@ -429,12 +485,27 @@ function syncShadowUI() {
         document.getElementById('input-group-name').addEventListener('keypress', (e) => { if (e.key === 'Enter') document.getElementById('btn-save-group').click(); });
     }
 
+    // Sync Button Visibility Logic
+    const syncBtn = document.getElementById('btn-sync-holdings');
+    if (syncBtn && !isSyncing) {
+        const prices = dashboard.querySelectorAll('.q-price');
+        let ghostDetected = false;
+        for (let p of prices) {
+            if (p.textContent.includes('...')) {
+                ghostDetected = true;
+                break;
+            }
+        }
+        syncBtn.style.display = ghostDetected ? 'inline-block' : 'none';
+    }
+
     // --- VIEW STATE TOGGLE LOGIC ---
     const floatingBtn = document.getElementById('q-floating-settings');
 
     if (viewState === 'native') {
         dashboard.style.display = 'none';
-        if(floatingBtn) floatingBtn.style.display = 'flex';
+        if(floatingBtn && !isSyncing) floatingBtn.style.display = 'flex';
+        else if (floatingBtn) floatingBtn.style.display = 'none';
 
         let spacer = document.getElementById('q-phantom-spacer');
         if (spacer) spacer.style.height = '0px';
@@ -446,7 +517,9 @@ function syncShadowUI() {
             child.style.pointerEvents = 'auto';
             child.style.transform = 'none';
         });
-        return; 
+        
+        // If we are actively syncing, we still need to run the extraction loop below to populate syncTickers Set
+        if (!isSyncing) return; 
     } else {
         dashboard.style.display = 'block';
         if(floatingBtn) floatingBtn.style.display = 'none';
@@ -456,9 +529,9 @@ function syncShadowUI() {
     const listHeader = Array.from(innerScroll.children).find(c => c.getAttribute('data-testid') === 'Header-Lists');
     if (listHeader) cachedNativeGap = parseInt(listHeader.style.top || '0', 10);
     
-    if (cachedNativeGap > 0) dashboard.style.maxHeight = `${cachedNativeGap}px`;
+    if (cachedNativeGap > 0 && dashboard) dashboard.style.maxHeight = `${cachedNativeGap}px`;
     
-    const dashHeight = dashboard.offsetHeight;
+    const dashHeight = dashboard ? dashboard.offsetHeight : 0;
     const shift = dashHeight - cachedNativeGap;
 
     let catStats = {};
@@ -477,14 +550,27 @@ function syncShadowUI() {
         }
 
         if (isStocksHeader || isPortfolioPosition) {
-            child.style.opacity = '0.001';
-            child.style.pointerEvents = 'none';
-            child.style.transform = 'none';
+            
+            // Hide native elements only if we are in custom view mode
+            if (viewState === 'custom') {
+                child.style.opacity = '0.001';
+                child.style.pointerEvents = 'none';
+                child.style.transform = 'none';
+            }
 
             if (isPortfolioPosition) {
                 const link = child.querySelector('a');
                 const ticker = link.href.split('/stocks/')[1].split('?')[0].toUpperCase();
                 
+                // Live Sync Scanner Logic
+                if (isSyncing) {
+                    syncTickers.add(ticker);
+                    document.getElementById('q-sync-count').innerText = syncTickers.size;
+                    return; // Skip normal UI injection while syncing
+                }
+
+                if (viewState === 'native') return;
+
                 let sharesText = "";
                 child.querySelectorAll('span').forEach(s => { 
                     if (s.innerText.toLowerCase().includes('share')) sharesText = s.innerText; 
@@ -538,7 +624,6 @@ function syncShadowUI() {
                         }
                     } else {
                         // Prevent the layout from looking broken when native UI is toggled
-                        //pctEl.innerText = isFallback ? '(Metric Toggled)' : '';
                         pctEl.className = 'q-percent'; 
                         if (nativeSvg && chartContainer && !nativeSvg.closest('button')) {
                             let cloned = nativeSvg.cloneNode(true);
@@ -562,10 +647,12 @@ function syncShadowUI() {
                 }
             }
         } else {
-            // Apply Safe Negative Shift
-            if (cachedNativeGap > 0 && shift <= 0) child.style.transform = `translateY(${shift}px)`;
+            // Apply Safe Negative Shift only in custom view
+            if (viewState === 'custom' && cachedNativeGap > 0 && shift <= 0) child.style.transform = `translateY(${shift}px)`;
         }
     });
+
+    if (viewState === 'native' || isSyncing) return; // Halt metric processing if not in custom dashboard
 
     // Update Header Aggregates Based on Selected Metric
     Object.keys(groups).forEach(g => {
@@ -585,7 +672,6 @@ function syncShadowUI() {
                 let totalStr = catStats[g].current.toLocaleString('en-US', { style: 'currency', currency: 'USD' });
                 primaryMetricHtml = `<span class="q-green">${totalStr}</span>`;
             } else if (metricState === 'all_time') {
-                // Mocked out due to DOM limitations on the sidebar view
                 primaryMetricHtml = `<span class="q-green">+--.--% All Time</span>`;
             }
             
