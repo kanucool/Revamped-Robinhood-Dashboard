@@ -1,0 +1,26 @@
+{
+  "manifest_version": 3,
+  "name": "RH Quant Extension",
+  "version": "1.0",
+  "description": "Custom UI groups and historical JSON extraction.",
+  "permissions": ["storage", "downloads"],
+  "host_permissions": [
+    "https://robinhood.com/*",
+    "https://*.robinhood.com/*"
+  ],
+  "content_scripts": [{
+    "matches": [
+      "https://robinhood.com/*",
+      "https://*.robinhood.com/*"
+    ],
+    "js": ["content.js"],
+    "run_at": "document_idle"
+  }],
+  "web_accessible_resources": [{
+    "resources": ["inject.js"],
+    "matches": [
+      "https://robinhood.com/*",
+      "https://*.robinhood.com/*"
+    ]
+  }]
+}
