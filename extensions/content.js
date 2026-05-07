@@ -5,14 +5,14 @@
  * 2. View Toggle: Seamlessly switch between Custom Dashboard and Native Robinhood views.
  * 3. Dynamic Aggregates: Select between Today's $, Total Value, and All-Time Return.
  * 4. Hybrid Layout Engine: Safely translates native Watchlist UP without shrinking the React container.
- * 5. Design Fidelity: Native typography, caret animations, and auto-theme SVGs.
+ * 5. Design Fidelity: Native typography, caret animations, auto-theme SVGs, and inline UI interactions.
  */
 
 console.log("[Quant Extractor] Initializing V29 Build...");
 
 // --- 1. STATE & PERSISTENCE ---
-let groups = JSON.parse(localStorage.getItem('rh_quant_groups')) || { "Uncategorized": [] };
-if (!groups["Uncategorized"]) groups["Uncategorized"] = []; 
+let groups = JSON.parse(localStorage.getItem('rh_quant_groups')) || { "Misc": [] };
+if (!groups["Misc"]) groups["Misc"] = []; 
 
 let groupStates = JSON.parse(localStorage.getItem('rh_quant_states')) || {};
 let viewState = localStorage.getItem('rh_quant_view') || 'custom'; // 'custom' or 'native'
@@ -59,7 +59,7 @@ style.innerHTML = `
     .q-btn-settings { background: transparent; border: none; color: var(--rh__text-color); cursor: pointer; padding: 4px; display: flex; align-items: center; justify-content: center; }
     .q-btn-settings:hover { opacity: 0.7; }
 
-    /* Settings Menu Dropdown - Fixed visibility and cursor issues */
+    /* Settings Menu Dropdown */
     .q-settings-menu { display: none; position: fixed; top: 70px; right: 24px; background: var(--rh__bg-default, #ffffff); border: 1px solid var(--rh__divider-color, #e2e2e4); border-radius: 8px; box-shadow: 0 4px 12px rgba(0,0,0,0.15); padding: 8px; z-index: 9999; width: 200px; }
     @media (prefers-color-scheme: dark) { .q-settings-menu { background: var(--rh__bg-default, #131315); border-color: var(--rh__divider-color, #333333); } }
     .q-settings-menu.show { display: block; }
@@ -73,9 +73,12 @@ style.innerHTML = `
         .q-settings-select option { background: #131315; color: #ffffff; } 
     }
 
-    /* Persistent Native Settings Button - Shrunk size */
-    .q-floating-settings { display: none; position: fixed; bottom: 24px; right: 24px; background: var(--rh__bg-default, #ffffff); border: 1px solid var(--rh__divider-color, #e2e2e4); border-radius: 50%; width: 32px; height: 32px; align-items: center; justify-content: center; cursor: pointer; z-index: 9998; box-shadow: 0 4px 12px rgba(0,0,0,0.15); color: var(--rh__text-color, #000); transition: opacity 0.2s; }
-    .q-floating-settings svg { width: 16px; height: 16px; }
+    .q-btn-danger { background: transparent; color: #FF5000; border: 1px solid rgba(255, 80, 0, 0.5); margin-top: 4px; width: 100%; padding: 6px; border-radius: 6px; cursor: pointer; font-weight: 600; font-size: 13px; transition: all 0.2s; }
+    .q-btn-danger:hover { background: #FF5000; color: #ffffff; }
+
+    /* Persistent Native Settings Button */
+    .q-floating-settings { display: none; position: fixed; top: 80px; right: 24px; background: var(--rh__bg-default, #ffffff); border: 1px solid var(--rh__divider-color, #e2e2e4); border-radius: 50%; width: 40px; height: 40px; align-items: center; justify-content: center; cursor: pointer; z-index: 9998; box-shadow: 0 4px 12px rgba(0,0,0,0.15); color: var(--rh__text-color, #000); transition: opacity 0.2s; }
+    .q-floating-settings svg { width: 20px; height: 20px; }
     .q-floating-settings:hover { opacity: 0.8; }
     @media (prefers-color-scheme: dark) { .q-floating-settings { background: var(--rh__bg-default, #131315); color: var(--rh__text-color, #fff); border-color: #333333; } }
 
@@ -85,7 +88,7 @@ style.innerHTML = `
     .q-btn-cancel { background: transparent; color: var(--rh__text-muted); border: none; cursor: pointer; font-size: 13px; margin-left: 8px; }
 
     .q-group { margin: 0 !important; display: block !important;}
-    .q-summary { display: flex !important; justify-content: space-between !important; align-items: center !important; padding: 0 24px !important; height: 36px !important; cursor: grab !important; list-style: none !important; outline: none !important; border-bottom: 1px solid var(--rh__divider-color); }
+    .q-summary { display: flex !important; justify-content: space-between !important; align-items: center !important; padding: 0 24px !important; height: 36px !important; cursor: grab !important; list-style: none !important; outline: none !important; border-bottom: 1px solid var(--rh__divider-color); transition: background 0.2s; }
     .q-summary::-webkit-details-marker { display: none !important; }
     .q-summary:hover { background: rgba(174, 174, 174, 0.21) !important; }
     
@@ -103,9 +106,12 @@ style.innerHTML = `
     .q-btn-x { color: #FF5000; cursor: pointer; font-size: 15px; font-weight: bold; background:none; border:none; padding: 0;}
     .q-btn-trash { background: transparent; border: none; color: var(--rh__text-muted); cursor: pointer; font-size: 14px; padding: 0 4px; }
     .q-btn-trash:hover { color: #FF5000; }
+    .q-btn-plus { background: transparent; border: none; color: var(--rh__text-muted); cursor: pointer; font-size: 16px; font-weight: 600; padding: 0 4px; margin-left: 4px; }
+    .q-btn-plus:hover { color: #00C805; }
 
-    .q-dropzone { min-height: 48px !important; display: flex !important; flex-direction: column !important; padding-bottom: 8px; transition: background 0.2s; }
-    .q-dropzone:empty::before { content: "Drag stocks here..."; color: var(--rh__text-muted, #888); font-size: 13px; text-align: center; padding-top: 14px; pointer-events: none; opacity: 0.5; }
+    /* Shrunk Dropzone */
+    .q-dropzone { min-height: 28px !important; display: flex !important; flex-direction: column !important; padding-bottom: 4px; transition: background 0.2s; }
+    .q-dropzone:empty::before { content: "Drag stocks here..."; color: var(--rh__text-muted, #888); font-size: 12px; text-align: center; padding-top: 8px; pointer-events: none; opacity: 0.5; }
     .q-dropzone.drag-over { background: rgba(0, 200, 5, 0.05) !important; border-left: 2px solid #00C805; }
     
     .q-item { 
@@ -159,6 +165,13 @@ function initGlobalUI() {
                     <option value="all_time" ${metricState === 'all_time' ? 'selected' : ''}>All-Time % Gain</option>
                 </select>
             </div>
+            <div class="q-settings-item" style="border-top: 1px solid var(--rh__divider-color, #e2e2e4); padding-top: 12px; margin-top: 4px;">
+                <button class="q-btn-danger" id="btn-reset-data">Reset</button>
+                <div class="q-confirm-del" id="ui-reset-confirm" style="justify-content: center; gap: 16px; padding: 4px 0;">
+                    <button class="q-btn-check" id="btn-reset-yes">✓</button>
+                    <button class="q-btn-x" id="btn-reset-no">✕</button>
+                </div>
+            </div>
         `;
         document.body.appendChild(menu);
 
@@ -167,10 +180,32 @@ function initGlobalUI() {
             saveViewState(); 
             menu.classList.remove('show'); 
         };
+        
         document.getElementById('q-select-metric').onchange = (e) => { 
             metricState = e.target.value; 
             saveMetricState(); 
             menu.classList.remove('show'); 
+            const dash = document.getElementById('quant-dashboard');
+            if(dash) dash.remove(); 
+        };
+
+        const resetBtn = document.getElementById('btn-reset-data');
+        const resetConfirm = document.getElementById('ui-reset-confirm');
+        
+        resetBtn.onclick = () => { 
+            resetBtn.style.display = 'none'; 
+            resetConfirm.style.display = 'flex'; 
+        };
+        document.getElementById('btn-reset-no').onclick = () => { 
+            resetConfirm.style.display = 'none'; 
+            resetBtn.style.display = 'block'; 
+        };
+        document.getElementById('btn-reset-yes').onclick = () => {
+            localStorage.removeItem('rh_quant_groups');
+            localStorage.removeItem('rh_quant_states');
+            localStorage.removeItem('rh_quant_view');
+            localStorage.removeItem('rh_quant_metric');
+            window.location.reload();
         };
     }
 
@@ -233,7 +268,12 @@ function buildDashboard() {
 
         const summary = document.createElement('summary');
         summary.className = 'q-summary';
-        let controlsHtml = groupName !== "Uncategorized" ? `<div class="q-controls"><button class="q-btn-trash">✕</button><div class="q-confirm-del"><button class="q-btn-check">✓</button><button class="q-btn-x">✕</button></div></div>` : '';
+        
+        let controlsHtml = `<div class="q-controls">`;
+        if (groupName !== "Misc") {
+            controlsHtml += `<button class="q-btn-trash">✕</button><div class="q-confirm-del"><button class="q-btn-check">✓</button><button class="q-btn-x">✕</button></div>`;
+        }
+        controlsHtml += `<button class="q-btn-plus">+</button></div>`;
         
         summary.innerHTML = `
             <div class="q-cat-wrap">
@@ -248,15 +288,87 @@ function buildDashboard() {
             </div>
         `;
         
-        if (groupName !== "Uncategorized") {
+        // Setup direct summary drop zone
+        summary.addEventListener('dragover', e => {
+            if (e.dataTransfer.types.includes('text/ticker')) {
+                e.preventDefault();
+                summary.style.background = 'rgba(0, 200, 5, 0.1)';
+            }
+        });
+        summary.addEventListener('dragleave', () => summary.style.background = '');
+        summary.addEventListener('drop', e => {
+            if (e.dataTransfer.types.includes('text/ticker')) {
+                e.preventDefault();
+                e.stopPropagation(); // prevent dropping on container as well
+                summary.style.background = '';
+                const ticker = e.dataTransfer.getData('text/ticker');
+                for (let g in groups) groups[g] = groups[g].filter(t => t !== ticker);
+                groups[groupName].push(ticker); saveState();
+                const item = document.getElementById(`q-item-${ticker}`);
+                const dropzone = document.getElementById(`dropzone-${groupName.replace(/\s+/g, '')}`);
+                if (item && dropzone) dropzone.appendChild(item);
+            }
+        });
+
+        if (groupName !== "Misc") {
             const trash = summary.querySelector('.q-btn-trash');
             const confirmUI = summary.querySelector('.q-confirm-del');
-            trash.onclick = (e) => { e.preventDefault(); trash.style.display = 'none'; confirmUI.style.display = 'flex'; };
-            summary.querySelector('.q-btn-x').onclick = (e) => { e.preventDefault(); trash.style.display = 'block'; confirmUI.style.display = 'none'; };
-            summary.querySelector('.q-btn-check').onclick = (e) => { e.preventDefault(); groups["Uncategorized"].push(...groups[groupName]); delete groups[groupName]; saveState(); dashboard.remove(); };
+            trash.onclick = (e) => { e.preventDefault(); e.stopPropagation(); trash.style.display = 'none'; confirmUI.style.display = 'flex'; };
+            summary.querySelector('.q-btn-x').onclick = (e) => { e.preventDefault(); e.stopPropagation(); trash.style.display = 'block'; confirmUI.style.display = 'none'; };
+            summary.querySelector('.q-btn-check').onclick = (e) => { e.preventDefault(); e.stopPropagation(); groups["Misc"].push(...groups[groupName]); delete groups[groupName]; saveState(); dashboard.remove(); };
         }
+        
         details.appendChild(summary);
 
+        // Quick Add Form
+        const addTickerForm = document.createElement('div');
+        addTickerForm.className = 'q-inline-form';
+        addTickerForm.style.padding = '8px 24px';
+        addTickerForm.style.background = 'rgba(0,0,0,0.02)';
+        addTickerForm.innerHTML = `
+            <input type="text" class="q-inline-input" placeholder="Ticker" style="width: 80px; padding: 4px 8px;">
+            <button class="q-btn-save">Add</button>
+            <button class="q-btn-cancel">✕</button>
+        `;
+        
+        const plusBtn = summary.querySelector('.q-btn-plus');
+        plusBtn.onclick = (e) => {
+            e.preventDefault();
+            e.stopPropagation();
+            details.open = true;
+            addTickerForm.style.display = 'block';
+            addTickerForm.querySelector('input').focus();
+        };
+
+        const tkrInput = addTickerForm.querySelector('input');
+        const saveTkr = addTickerForm.querySelectorAll('button')[0];
+        const cancelTkr = addTickerForm.querySelectorAll('button')[1];
+
+        const doSaveTicker = (e) => {
+            if(e) e.preventDefault();
+            const ticker = tkrInput.value.toUpperCase().trim();
+            if (ticker) {
+                let isKnown = false;
+                for (let g in groups) { if (groups[g].includes(ticker)) isKnown = true; }
+                if (isKnown) {
+                    for (let g in groups) groups[g] = groups[g].filter(t => t !== ticker);
+                    groups[groupName].push(ticker);
+                    saveState();
+                    const dash = document.getElementById('quant-dashboard');
+                    if(dash) dash.remove(); 
+                }
+            }
+            addTickerForm.style.display = 'none';
+            tkrInput.value = '';
+        };
+
+        saveTkr.onclick = doSaveTicker;
+        tkrInput.addEventListener('keypress', (e) => { if(e.key === 'Enter') doSaveTicker(e); });
+        cancelTkr.onclick = (e) => { e.preventDefault(); addTickerForm.style.display = 'none'; tkrInput.value = ''; };
+
+        details.appendChild(addTickerForm);
+
+        // Standard Dropzone
         const dropzone = document.createElement('div');
         dropzone.className = 'q-dropzone';
         dropzone.id = `dropzone-${groupName.replace(/\s+/g, '')}`;
@@ -361,10 +473,9 @@ function syncShadowUI() {
         const isStocksHeader = testId === 'Header-Stocks';
         let isPortfolioPosition = false;
         
-        // Expanded resilient check for the cell link
-        if (testId === 'PositionCell' || child.querySelector('a[href*="/stocks/"]')) {
-            const link = child.querySelector('a[href*="/stocks/"]');
-            if (link) isPortfolioPosition = true;
+        if (testId === 'PositionCell') {
+            const link = child.querySelector('a');
+            if (link && link.href.includes('lists_section_position')) isPortfolioPosition = true;
         }
 
         if (isStocksHeader || isPortfolioPosition) {
@@ -373,39 +484,27 @@ function syncShadowUI() {
             child.style.transform = 'none';
 
             if (isPortfolioPosition) {
-                const link = child.querySelector('a[href*="/stocks/"]');
-                if (!link) return;
+                const link = child.querySelector('a');
+                const ticker = link.href.split('/stocks/')[1].split('?')[0].toUpperCase();
                 
-                const tickerMatch = link.href.match(/\/stocks\/([^/?]+)/);
-                if(!tickerMatch) return;
-                const ticker = tickerMatch[1].toUpperCase().trim();
-                
-                // Using textContent instead of innerText avoids browser layout calculation drops
                 let sharesText = "";
                 child.querySelectorAll('span').forEach(s => { 
-                    if (s.textContent.toLowerCase().includes('share')) sharesText = s.textContent; 
+                    if (s.innerText.toLowerCase().includes('share')) sharesText = s.innerText; 
                 });
+                if (sharesText === "") return; 
                 
-                let activeG = "Uncategorized";
+                let activeG = "Misc";
                 let isKnown = false;
                 for (let g in groups) { if (groups[g].includes(ticker)) { isKnown = true; activeG = g; } }
-                if (!isKnown) { groups["Uncategorized"].push(ticker); saveState(); dashboard.remove(); return; }
+                if (!isKnown) { groups["Misc"].push(ticker); saveState(); dashboard.remove(); return; }
 
                 const item = document.getElementById(`q-item-${ticker}`);
                 if (item) {
-                    const priceNode = child.querySelector('[data-testid="PriceChangeQuoteWrapper"]') || child.querySelector('span[data-testid="price"]');
-                    const pctNode = child.querySelector('[data-testid="PriceChangeValueWrapper"]') || child.querySelector('span[data-testid="percent"]');
-                    
-                    const price = priceNode ? priceNode.textContent : null;
-                    const pct = pctNode ? pctNode.textContent : null;
+                    const price = child.querySelector('[data-testid="PriceChangeQuoteWrapper"]')?.innerText;
+                    const pct = child.querySelector('[data-testid="PriceChangeValueWrapper"]')?.innerText;
                     
                     if (price) item.querySelector('.q-price').innerText = price;
-                    
-                    if (sharesText) {
-                        item.querySelector('.q-shares').innerText = sharesText;
-                    } else {
-                        item.querySelector('.q-shares').innerText = "Watchlist"; // Graceful fallback
-                    }
+                    item.querySelector('.q-shares').innerText = sharesText;
                     
                     if (pct) {
                         const pctEl = item.querySelector('.q-percent');
@@ -414,11 +513,9 @@ function syncShadowUI() {
                         pctEl.className = `q-percent ${isRed ? 'q-red' : 'q-green'}`;
                         const colorCode = isRed ? '#FF5000' : '#00C805';
 
-                        const nativeSvg = child.querySelector('svg[data-testid="VisualizationsWrapper"]') || child.querySelector('svg');
+                        const nativeSvg = child.querySelector('svg[data-testid="VisualizationsWrapper"]');
                         const chartContainer = item.querySelector('.q-chart');
-                        
-                        // Prevent stealing the caret SVGs by ensuring it's an actual path-based graph
-                        if (nativeSvg && chartContainer && !nativeSvg.closest('button')) {
+                        if (nativeSvg && chartContainer) {
                             let cloned = nativeSvg.cloneNode(true);
                             cloned.querySelectorAll('path').forEach(p => { if (p.getAttribute('fill') === 'none') { p.style.stroke = colorCode; p.style.strokeWidth = '1.5px'; }});
                             cloned.querySelectorAll('circle').forEach(c => c.style.fill = colorCode);
@@ -440,10 +537,12 @@ function syncShadowUI() {
                 }
             }
         } else {
+            // Apply Safe Negative Shift
             if (cachedNativeGap > 0 && shift <= 0) child.style.transform = `translateY(${shift}px)`;
         }
     });
 
+    // Update Header Aggregates Based on Selected Metric
     Object.keys(groups).forEach(g => {
         const statsEl = document.getElementById(`q-stats-${g.replace(/\s+/g, '')}`);
         if (statsEl && catStats[g].hasData) {
@@ -461,6 +560,7 @@ function syncShadowUI() {
                 let totalStr = catStats[g].current.toLocaleString('en-US', { style: 'currency', currency: 'USD' });
                 primaryMetricHtml = `<span class="q-green">${totalStr}</span>`;
             } else if (metricState === 'all_time') {
+                // Mocked out due to DOM limitations on the sidebar view
                 primaryMetricHtml = `<span class="q-green">+--.--% All Time</span>`;
             }
             
@@ -469,4 +569,4 @@ function syncShadowUI() {
     });
 }
 
-setInterval(syncShadowUI, 250);
+setInterval(syncShadowUI, 500);
