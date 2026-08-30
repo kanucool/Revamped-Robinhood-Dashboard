@@ -81,7 +81,7 @@ function syncShadowUI() {
     let catStats = {};
     SECTION_NAMES.forEach(section => {
         catStats[section] = {};
-        Object.keys(groups[section]).forEach(g => { catStats[section][g] = { current: 0, previous: 0, hasData: false }; });
+        Object.keys(groups[section]).forEach(g => { catStats[section][g] = { current: 0, previous: 0, hasData: false, costBasisTotal: 0, missingCostBasis: false }; });
     });
 
     // Cumulative vertical shift introduced by custom dashboards that are shorter than the
@@ -217,6 +217,13 @@ function syncShadowUI() {
                             catStats[matchedSection][activeG].current += (p * s);
                             catStats[matchedSection][activeG].previous += (p * s) / (1 + prc);
                             catStats[matchedSection][activeG].hasData = true;
+
+                            const basis = costBasis[symbol];
+                            if (basis && !isNaN(basis.costBasis)) {
+                                catStats[matchedSection][activeG].costBasisTotal += basis.costBasis;
+                            } else {
+                                catStats[matchedSection][activeG].missingCostBasis = true;
+                            }
                         }
                     }
                 }
@@ -276,6 +283,14 @@ function syncShadowUI() {
                 } else if (metricState === 'total_value') {
                     let totalStr = stat.current.toLocaleString('en-US', { style: 'currency', currency: 'USD' });
                     primaryMetricHtml = `<span class="q-green">${totalStr}</span>`;
+                } else if (metricState === 'total_return_pct') {
+                    if (!stat.missingCostBasis && stat.costBasisTotal > 0) {
+                        let retPct = ((stat.current - stat.costBasisTotal) / stat.costBasisTotal) * 100;
+                        let isRetR = retPct < 0;
+                        primaryMetricHtml = `<span class="${isRetR ? 'q-red' : 'q-green'}">${isRetR ? '-' : '+'}${Math.abs(retPct).toFixed(2)}%</span>`;
+                    } else {
+                        primaryMetricHtml = `<span class="q-green">--.--%</span>`;
+                    }
                 } else if (metricState === 'portfolio_pct') {
                     if (denominator > 0) {
                         let portPct = (stat.current / denominator) * 100;

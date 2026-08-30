@@ -23,6 +23,7 @@ function initGlobalUI() {
                 <select class="q-settings-select" id="q-select-metric">
                     <option value="today_gain" ${metricState === 'today_gain' ? 'selected' : ''}>Today's $ Gain</option>
                     <option value="total_value" ${metricState === 'total_value' ? 'selected' : ''}>Total $ Value</option>
+                    <option value="total_return_pct" ${metricState === 'total_return_pct' ? 'selected' : ''}>Total % Return</option>
                     <option value="portfolio_pct" ${metricState === 'portfolio_pct' ? 'selected' : ''}>Portfolio %</option>
                 </select>
             </div>

@@ -6,6 +6,12 @@ function fmtSigned(n) {
     return `<span class="${cls}">${sign}${val}</span>`;
 }
 
+function fmtSignedPct(n) {
+    const sign = n < 0 ? '-' : '+';
+    const cls = n < 0 ? 'q-red' : 'q-green';
+    return `<span class="${cls}">${sign}${Math.abs(n).toFixed(2)}%</span>`;
+}
+
 function showTooltip(item, ticker) {
     const tooltip = document.getElementById('q-hover-tooltip');
     if (!tooltip || !document.body.contains(item)) return;
@@ -20,8 +26,8 @@ function showTooltip(item, ticker) {
     tooltip.querySelector('#q-tt-day').innerHTML = !isNaN(pct) ? fmtSigned(equity - equity / (1 + pct)) : '--';
 
     const basis = costBasis[ticker];
-    tooltip.querySelector('#q-tt-total').innerHTML = (basis && !isNaN(basis.costBasis))
-        ? fmtSigned(equity - basis.costBasis)
+    tooltip.querySelector('#q-tt-total').innerHTML = (basis && !isNaN(basis.costBasis) && basis.costBasis > 0)
+        ? `${fmtSigned(equity - basis.costBasis)} ${fmtSignedPct((equity - basis.costBasis) / basis.costBasis * 100)}`
         : `<span class="q-tt-label">Unavailable</span>`;
 
     tooltip.classList.add('show'); // show first so its real width is measurable below
