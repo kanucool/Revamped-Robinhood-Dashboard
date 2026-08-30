@@ -13,14 +13,22 @@
       "https://robinhood.com/*",
       "https://*.robinhood.com/*"
     ],
-    "js": ["content.js"],
-    "run_at": "document_idle"
-  }],
-  "web_accessible_resources": [{
-    "resources": ["inject.js"],
+    "js": ["inject.js"],
+    "world": "MAIN",
+    "run_at": "document_start"
+  }, {
     "matches": [
       "https://robinhood.com/*",
       "https://*.robinhood.com/*"
-    ]
+    ],
+    "js": [
+      "content/state.js",
+      "content/tooltip.js",
+      "content/styles.js",
+      "content/global-ui.js",
+      "content/dashboard.js",
+      "content/sync-engine.js"
+    ],
+    "run_at": "document_idle"
   }]
 }
